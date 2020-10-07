@@ -13,11 +13,11 @@ Optical Mapping inversion detection and validation
 
 ### 8p
 
-* Location: chr8:-
+* Recurrent CNV Location (hg19): chr8:8,100,064-11,766,329
 
 ### 17q
 
-* Location: chr17:-
+* Recurrent CNV Location (hg19): chr17:43,705,166-44,164,880
 
 ## Methods
 
