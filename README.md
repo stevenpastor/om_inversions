@@ -1,4 +1,4 @@
-# om_inversions
+# Detection and Validation of Recurrent CNV-Driven Inversions with Optical Mapping
 Optical Mapping inversion detection and validation
 
 ## Background
