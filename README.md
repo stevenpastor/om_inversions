@@ -51,6 +51,10 @@ Optical Mapping inversion detection and validation
 
 * __Work in Progress:__ Code provided as Snakemake workflow 
 
+* Current: see how_to_run.txt
+
+* todo: finish snakemake
+
 ## Results
 
-* Work in Progress.
+* Work in Progress but see PPTX for results.

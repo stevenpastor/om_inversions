@@ -1,0 +1,80 @@
+# NOTE: IF ALREADY SPLIT BNX FILES, MAKE THE REFERENCE CMAP AND START WITH STEP 2.b.
+
+
+1. qsub 1_split.sh
+
+2. ./2_post_split.sh
+
+2.b. cat 2a_before_alignment.txt
+# these are the qsub commands that will copy/paste into terminal to do #3
+
+3. cat commands to qsub
+# example:
+#qsub -t 1-9 3_array_ra_align.sh 3935977
+#qstat -j 18510103 | grep "maxvmem" | cut -d',' -f8 | sed 's/\ maxvmem=//g' | sort -k1nr
+
+4.
+#mkdir 17q_mapped
+#move all the *_mapped files to 17q_mapped
+#edit the below script, then:
+#qsub 4_17q_filter_post_alignment.sh
+
+5.
+#edit the below script, then:
+#5_17q_molecule_support_zygosity_forloop.sh
+
+# moved the above to:
+mkdir 17q_mapped
+
+
+# 17Q ONLY:
+# at this point, I got only the parental genomes and then did this:
+cd 17q_mapped
+for i in *_mapped; do a=$(echo $i | sed 's/_mapped//g'); awk -v id="$a" '$1 == id' ../all_assemblies_parents.txt | cut -f1,3; done > copyme
+
+mkdir RENAMED
+
+while read line1 line2; do cp -r $line1"_mapped" RENAMED/$line1"_"$line2; done <copyme
+
+cd RENAMED
+
+# remove molecules which split map to adjacent SD group and not opposing one:
+FIVEFIVESD=492293
+FIVETHREESD=705165
+THREEFIVESD=1280653
+THREETHREESD=1784489
+
+for i in *; do grep -v "#" $i/*multiples.xmap | cut -f2 | sort | uniq | sort -k1n > $i/unique_ids; while read line; do awk -v id="$line" '$2 == id' $i/*multiples.xmap | cut -f2,6,7 | tr '\n' '\t'; echo ""; done <$i/unique_ids | awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$6"\t"$8"\t"$9"\t"$11"\t"$12}' | awk -v ff="$FIVEFIVESD" -v ft="$FIVETHREESD" '($2 >= ff && $2 <= ft) || ($3 >= ff && $3 <= ft) || ($4 >= ff && $4 <= ft) || ($5 >= ff && $5 <= ft) || ($6 >= ff && $6 <= ft) || ($7 >= ff && $7 <= ft)' | cut -f1 > $i/five.ids; while read line; do awk -v id="$line" '$2 == id' $i/*multiples.xmap | cut -f2,6,7 | tr '\n' '\t'; echo ""; done <$i/unique_ids | awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$6"\t"$8"\t"$9"\t"$11"\t"$12}' | awk -v ff="$THREEFIVESD" -v ft="$THREETHREESD" '($2 >= ff && $2 <= ft) || ($3 >= ff && $3 <= ft) || ($4 >= ff && $4 <= ft) || ($5 >= ff && $5 <= ft) || ($6 >= ff && $6 <= ft) || ($7 >= ff && $7 <= ft)' | cut -f1 > $i/three.ids; grep -Fxf $i/five.ids $i/three.ids > $i/shared; grep "#" $i/*multiples.xmap > $i/tmp; while read line; do awk -v id="$line" '$2 == id' $i/*multiples.xmap >> $i/tmp; done <$i/shared; rm $i/*multiples.xmap; mv $i/tmp $i/*multiples.xmap; done
+
+echo "#genome non-inversion_molecules inversion_molecules" | tr ' ' '\t' > 17q_RESULTS; for i in *; do echo $i | tr '\n' '\t'; grep -v "#" $i/*singles.xmap | cut -f2 | sort | uniq | wc -l | tr '\n' '\t'; grep -v "#" $i/*multiples.xmap | cut -f2 | sort | uniq | wc -l; done | grep -v "17q_RESULTS" >> 17q_RESULTS
+
+
+
+
+
+# 7Q ONLY:
+# at this point, I got only the parental genomes and then did this:
+cd 7q_mapped
+for i in *_mapped; do a=$(echo $i | sed 's/_mapped//g'); awk -v id="$a" '$1 == id' ../all_assemblies_parents.txt | cut -f1,3; done > copyme
+
+mkdir RENAMED
+
+while read line1 line2; do cp -r $line1"_mapped" RENAMED/$line1"_"$line2; done <copyme
+
+cd RENAMED
+
+# remove molecules which split map to adjacent SD group and not opposing one:
+FIVEFIVESD=341677
+FIVETHREESD=1071921
+THREEFIVESD=2520593
+THREETHREESD=3321169
+
+for i in *; do grep -v "#" $i/*multiples.xmap | cut -f2 | sort | uniq | sort -k1n > $i/unique_ids; while read line; do awk -v id="$line" '$2 == id' $i/*multiples.xmap | cut -f2,6,7 | tr '\n' '\t'; echo ""; done <$i/unique_ids | awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$6"\t"$8"\t"$9"\t"$11"\t"$12}' | awk -v ff="$FIVEFIVESD" -v ft="$FIVETHREESD" '($2 >= ff && $2 <= ft) || ($3 >= ff && $3 <= ft) || ($4 >= ff && $4 <= ft) || ($5 >= ff && $5 <= ft) || ($6 >= ff && $6 <= ft) || ($7 >= ff && $7 <= ft)' | cut -f1 > $i/five.ids; while read line; do awk -v id="$line" '$2 == id' $i/*multiples.xmap | cut -f2,6,7 | tr '\n' '\t'; echo ""; done <$i/unique_ids | awk '{print $1"\t"$2"\t"$3"\t"$5"\t"$6"\t"$8"\t"$9"\t"$11"\t"$12}' | awk -v ff="$THREEFIVESD" -v ft="$THREETHREESD" '($2 >= ff && $2 <= ft) || ($3 >= ff && $3 <= ft) || ($4 >= ff && $4 <= ft) || ($5 >= ff && $5 <= ft) || ($6 >= ff && $6 <= ft) || ($7 >= ff && $7 <= ft)' | cut -f1 > $i/three.ids; grep -Fxf $i/five.ids $i/three.ids > $i/shared; grep "#" $i/*multiples.xmap > $i/tmp; while read line; do awk -v id="$line" '$2 == id' $i/*multiples.xmap >> $i/tmp; done <$i/shared; rm $i/*multiples.xmap; mv $i/tmp $i/*multiples.xmap; done
+
+echo "#genome non-inversion_molecules inversion_molecules" | tr ' ' '\t' > 7q_RESULTS; for i in *; do echo $i | tr '\n' '\t'; grep -v "#" $i/*singles.xmap | cut -f2 | sort | uniq | wc -l | tr '\n' '\t'; grep -v "#" $i/*multiples.xmap | cut -f2 | sort | uniq | wc -l; done | grep -v "7q_RESULTS" >> 7q_RESULTS
+
+
+
+
+
+
